@@ -24,6 +24,7 @@ def insert_to_db(eventid, cameoid, vector):
         # 提交到数据库中
         print("提交成功！")
     except Exception as e:
+        db.rollback()
         # 捕获异常
         raise e
     finally:
@@ -48,6 +49,7 @@ def readData():
         db.commit()
         # 提交到数据库中
     except Exception as e:
+        db.rollback()
         # 捕获异常
         raise e
     finally:
@@ -67,6 +69,7 @@ def del_vec(eventid):
         cur.execute(sql, (eventid))
         db.commit()
     except Exception as e:
+        db.rollback()
         raise e
     finally:
         db.close()
