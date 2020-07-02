@@ -24,12 +24,31 @@ def insert_to_db(eventid, cameoid, vector):
         # 提交到数据库中
         print("提交成功！")
     except Exception as e:
-        db.rollback()
         # 捕获异常
         raise e
     finally:
         db.close()  # 关闭连接
 
+
+def get_answer_sentence(cursor, event_id_list):
+    """
+    到数据库中根据事件id列表检索所有的事件短句
+    :param cursor:
+    :param event_id_list:
+    :return:
+    """
+    print(event_id_list)
+    sql = 'select shorten_sentence from ebm_event_info where event_id in %s'
+    
+    # 从数据库中检索列表中的东西，必须转化为元组且必须再套一层
+    cursor.execute(sql, (tuple(event_id_list),))
+
+    all = cursor.fetchall()
+    print(all)
+
+
+    return [once[0] for once in all]
+    
 
 def readData():
     db = ml.connect(host="localhost", user="root", password="12341234", db="exercise", port=3306)
@@ -49,7 +68,6 @@ def readData():
         db.commit()
         # 提交到数据库中
     except Exception as e:
-        db.rollback()
         # 捕获异常
         raise e
     finally:
@@ -69,7 +87,6 @@ def del_vec(eventid):
         cur.execute(sql, (eventid))
         db.commit()
     except Exception as e:
-        db.rollback()
         raise e
     finally:
         db.close()

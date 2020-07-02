@@ -8,6 +8,7 @@ import re
 def file_reader(file_path):
     """
     传入文件路径，读取文件内容，以字符串方式返回文件内容。
+    windows 默认编码为gbk,而linux默认编码为utf-8
     :param file_path: (str)文件路径
     :return: (str) content 文件内容
     :raise:
@@ -52,6 +53,8 @@ def data_process(content):
         content = re.sub('^([a-z0-9_\.-]+)@([\da-z\.-]+)\.([a-z\.]{2,6})$', '', content)
         content = re.sub('^[a-z\d]+(\.[a-z\d]+)*@([\da-z](-[\da-z])?)+(\.{1,2}[a-z]+)+$', '', content)
         # 剔除URL
+        # 这里会出现死循环的递归问题，这是正则替换内部的递归问题，主要是因为<>标签的问题
+        # 所有的以^开始以$结束的时候只能以此为模板开头的字符串被替换，其余的都不会被替换
         content = re.sub('^<([a-z]+)([^<]+)*(?:>(.*)<\/\1>|\s+\/>)$', '', content)
         content = re.sub('^[http]{4}\\:\\/\\/[a-z]*(\\.[a-zA-Z]*)*(\\/([a-zA-Z]|[0-9])*)*\\s?$','',content)
         # 剔除16进制值
@@ -64,6 +67,7 @@ def data_process(content):
         content = re.sub('^[a-z0-9_-]{3,16}$', '', content)
         content = re.sub('^[a-z0-9_-]{6,18}$', '', content)
         # 剔除HTML标签
+        # 此处也会出现死循环问题，也是因为正则匹配模板中的<>标签导致的递归问题，如果文本中只有半个<,这就会出错
         content = re.sub('^<([a-z]+)([^<]+)*(?:>(.*)<\/\1>|\s+\/>)$', '', content)
         # 剔除网络字符，剔除空白符
         content = content.strip().strip('\r\n\t').replace(u'\u3000', '').replace(u'\xa0', '')
